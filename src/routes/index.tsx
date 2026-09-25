@@ -1,38 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  ChevronRight,
-  CircleUserRound,
+  Briefcase,
+  Dumbbell,
+  Footprints,
   Headphones,
-  Heart,
   Laptop,
   Menu,
+  Play,
+  Plug,
   Search,
-  ShieldCheck,
   ShoppingBag,
   Smartphone,
-  Truck,
+  Speaker,
+  Star,
   Watch,
+  WashingMachine,
   X,
-  Zap,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import heroImage from "@/assets/bytepe-hero.jpg";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BytePe — Smart Tech, Easy Monthly Plans" },
-      {
-        name: "description",
-        content: "Shop phones, audio, wearables and laptops with simple monthly plans at BytePe.",
-      },
-      { property: "og:title", content: "BytePe — Smart Tech, Easy Monthly Plans" },
-      {
-        property: "og:description",
-        content: "Discover popular tech with simple prices and flexible monthly plans.",
-      },
+      { title: "BytePe — Latest Tech on Easy EMI" },
+      { name: "description", content: "Shop phones, audio, wearables, footwear and more on simple monthly EMI at BytePe." },
+      { property: "og:title", content: "BytePe — Latest Tech on Easy EMI" },
+      { property: "og:description", content: "Latest phone, lowest EMI. Upgrade anytime with BytePe." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -40,171 +35,229 @@ export const Route = createFileRoute("/")({
   component: Storefront,
 });
 
-type Product = {
-  name: string;
-  brand: string;
-  category: string;
-  price: string;
-  mrp: string;
-  monthly: string;
-  discount: string;
-  icon: typeof Smartphone;
-  tone: string;
-};
+const navLinks = ["Home", "Subscription", "EMI Store", "Products", "About Us", "Cart", "My Profile"];
 
 const categories = [
-  { label: "For You", icon: Zap },
-  { label: "Mobiles", icon: Smartphone },
-  { label: "Audio", icon: Headphones },
+  { label: "For You", icon: ShoppingBag },
+  { label: "Mobile", icon: Smartphone },
+  { label: "Audio", icon: Speaker },
+  { label: "Accessories", icon: Plug },
+  { label: "Luggage", icon: Briefcase },
   { label: "Wearables", icon: Watch },
-  { label: "Laptops", icon: Laptop },
+  { label: "Sports", icon: Dumbbell },
+  { label: "Appliances", icon: WashingMachine },
+  { label: "Electronics", icon: Laptop },
+  { label: "Footwear", icon: Footprints },
 ];
 
-const products: Product[] = [
-  { name: "Galaxy S26", brand: "Samsung", category: "Mobiles", price: "₹79,999", mrp: "₹89,999", monthly: "₹3,749/mo", discount: "11% off", icon: Smartphone, tone: "bg-product-coral" },
-  { name: "iPhone 17 Air", brand: "Apple", category: "Mobiles", price: "₹94,900", mrp: "₹99,900", monthly: "₹4,395/mo", discount: "5% off", icon: Smartphone, tone: "bg-product-blue" },
-  { name: "QuietComfort Ultra", brand: "Bose", category: "Audio", price: "₹29,999", mrp: "₹35,900", monthly: "₹1,399/mo", discount: "16% off", icon: Headphones, tone: "bg-product-sage" },
-  { name: "Watch Series 11", brand: "Apple", category: "Wearables", price: "₹46,900", mrp: "₹49,900", monthly: "₹2,182/mo", discount: "6% off", icon: Watch, tone: "bg-product-lilac" },
-  { name: "MacBook Air M5", brand: "Apple", category: "Laptops", price: "₹1,09,900", mrp: "₹1,19,900", monthly: "₹5,095/mo", discount: "8% off", icon: Laptop, tone: "bg-product-sky" },
-  { name: "Buds 4 Pro", brand: "Samsung", category: "Audio", price: "₹14,999", mrp: "₹18,999", monthly: "₹699/mo", discount: "21% off", icon: Headphones, tone: "bg-product-sun" },
+const banners = [
+  { title: "AirPods 5", price: "₹693/mo | ₹14,900", cta: "BUY NOW", tone: "bg-hero" },
+  { title: "Women Ankle Strap Pumps", price: "From ₹1,416", cta: "SHOP NOW", tone: "bg-product-coral" },
+  { title: "vivo T5X 5G", price: "From ₹28,999", cta: "SHOP NOW", tone: "bg-product-sky" },
+];
+
+const brands = ["Apple", "SAMSUNG", "Google", "Marshall", "NOTHING", "mokobara", "motorola", "vivo", "EDT", "Assembly"];
+
+type Item = { brand: string; name: string; monthly: string; price: string; mrp?: string; tag?: string; icon: typeof Smartphone; tone: string };
+
+const sections: { title: string; items: Item[] }[] = [
+  {
+    title: "New Launches",
+    items: [
+      { brand: "Apple", name: "iPhone 18 Pro", monthly: "₹7,673/mo", price: "₹1,64,900", tag: "New Launch", icon: Smartphone, tone: "bg-product-coral" },
+      { brand: "Apple", name: "iPhone 18 Pro Max", monthly: "₹8,371/mo", price: "₹1,79,900", tag: "New Launch", icon: Smartphone, tone: "bg-product-coral" },
+      { brand: "Apple", name: "AirPods 5", monthly: "₹693/mo", price: "₹14,900", tag: "New Launch", icon: Headphones, tone: "bg-muted" },
+      { brand: "Google", name: "Pixel 11", monthly: "₹3,839/mo", price: "₹82,499", mrp: "₹89,999", icon: Smartphone, tone: "bg-product-blue" },
+      { brand: "Samsung", name: "Galaxy S26", monthly: "₹4,374/mo", price: "₹93,999", mrp: "₹1,17,999", icon: Smartphone, tone: "bg-product-lilac" },
+    ],
+  },
+  {
+    title: "Iconic Sounds",
+    items: [
+      { brand: "Sony", name: "WF-C510 Truly Wireless", monthly: "₹209/mo", price: "₹4,500", mrp: "₹8,990", icon: Headphones, tone: "bg-muted" },
+      { brand: "Sennheiser", name: "ACCENTUM Open", monthly: "₹279/mo", price: "₹5,990", mrp: "₹12,990", icon: Headphones, tone: "bg-product-sun" },
+      { brand: "Marshall", name: "Emberton III", monthly: "₹744/mo", price: "₹15,999", mrp: "₹17,999", icon: Speaker, tone: "bg-product-sage" },
+      { brand: "Marshall", name: "Major V", monthly: "₹605/mo", price: "₹12,999", mrp: "₹14,999", icon: Headphones, tone: "bg-product-coral" },
+      { brand: "Samsung", name: "Galaxy Buds4", monthly: "₹791/mo", price: "₹16,999", mrp: "₹22,999", icon: Headphones, tone: "bg-product-sky" },
+    ],
+  },
+  {
+    title: "Stylish Footwear",
+    items: [
+      { brand: "Clog London", name: "Women Trendy Heels", monthly: "₹80/mo", price: "₹1,709", mrp: "₹2,799", icon: Footprints, tone: "bg-product-coral" },
+      { brand: "Clog London", name: "Men's Solid Brown", monthly: "₹154/mo", price: "₹3,299", mrp: "₹5,699", icon: Footprints, tone: "bg-product-sun" },
+      { brand: "Clog London", name: "Blue Sneakers", monthly: "₹80/mo", price: "₹1,729", mrp: "₹3,399", icon: Footprints, tone: "bg-product-blue" },
+      { brand: "Clog London", name: "Women Kitten Heel", monthly: "₹73/mo", price: "₹1,574", mrp: "₹2,499", icon: Footprints, tone: "bg-product-lilac" },
+      { brand: "Clog London", name: "Stylish Men's Sneaker", monthly: "₹80/mo", price: "₹1,729", mrp: "₹3,399", icon: Footprints, tone: "bg-product-sage" },
+    ],
+  },
+];
+
+const trending = ["Fitbit Charge 6", "Yonex", "Pixel 11", "Galaxy Buds 4 Pro"];
+const different = ["Latest Phone, Lowest EMI", "New Phone Every Year", "BytePe Subscription", "Always the Latest", "Zero Cost Store"];
+const reviews = [
+  { title: "Got my MacBook without financial stress", text: "The approval process was quick and seamless.", name: "Aanya Sharma" },
+  { title: "Upgrade without the hassle", text: "With BytePe, I don't even think about it. Just upgrade and continue.", name: "Aditya Singh" },
+  { title: "I bought my iPhone with pocket money", text: "Never thought I could afford an iPhone. BytePe EMIs made it vibe!", name: "Kshitiz" },
+  { title: "Love the flexibility", text: "I can decide later if I want to keep, return, or upgrade.", name: "Richa" },
 ];
 
 function Storefront() {
-  const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("For You");
+  const [active, setActive] = useState("For You");
+  const [slide, setSlide] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const visibleProducts = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return products.filter((product) => {
-      const inCategory = activeCategory === "For You" || product.category === activeCategory;
-      const matchesQuery = !normalized || `${product.brand} ${product.name}`.toLowerCase().includes(normalized);
-      return inCategory && matchesQuery;
-    });
-  }, [activeCategory, query]);
+  useEffect(() => {
+    const t = setInterval(() => setSlide((s) => (s + 1) % banners.length), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  const banner = banners[slide];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 md:px-8">
-          <a href="#top" aria-label="BytePe home" className="font-display flex size-12 shrink-0 items-center justify-center rounded-full bg-logo text-center text-xs font-bold leading-3 text-logo-foreground">
+      <header className="sticky top-0 z-30 bg-background">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-4 border-b border-border px-4 py-3 md:px-8">
+          <div className="grid size-12 shrink-0 place-items-center rounded-full bg-logo font-display text-sm leading-none text-logo-foreground">
             Byte<br />Pe
-          </a>
-          <label className="relative flex min-w-0 flex-1 md:max-w-md">
-            <span className="sr-only">Search products</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products, brands…" className="h-11 w-full rounded-full bg-muted px-5 pr-11 text-sm outline-none ring-ring placeholder:text-muted-foreground focus:ring-2" />
-            <Search className="pointer-events-none absolute right-4 top-3 size-5 text-muted-foreground" aria-hidden="true" />
+          </div>
+          <label className="flex flex-1 items-center rounded-full bg-muted px-5 py-3 shadow-card">
+            <input className="w-full bg-transparent text-sm outline-none" placeholder="Search for Products, brands..." />
+            <Search className="size-5" />
           </label>
-          <nav className="hidden items-center gap-6 lg:flex" aria-label="Main navigation">
-            <a className="text-sm font-semibold text-primary" href="#top">Home</a>
-            <a className="text-sm font-medium text-muted-foreground hover:text-foreground" href="#products">Products</a>
-            <a className="text-sm font-medium text-muted-foreground hover:text-foreground" href="#benefits">Why BytePe</a>
+          <nav className="hidden gap-6 text-sm lg:flex">
+            {navLinks.map((l, i) => (
+              <a key={l} href="#" className={cn("hover:text-primary", i === 0 && "text-primary")}>{l}</a>
+            ))}
           </nav>
-          <Button variant="ghost" size="icon" className="hidden md:inline-flex" aria-label="Account"><CircleUserRound className="size-5" /></Button>
-          <Button variant="ghost" size="icon" className="hidden md:inline-flex" aria-label="Shopping bag"><ShoppingBag className="size-5" /></Button>
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle menu" aria-expanded={menuOpen}>
-            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </Button>
+          <button className="lg:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
+            {menuOpen ? <X /> : <Menu />}
+          </button>
         </div>
         {menuOpen && (
-          <nav className="border-t border-border px-4 py-4 lg:hidden" aria-label="Mobile navigation">
-            <div className="mx-auto grid max-w-7xl gap-1">
-              {["Home", "Products", "Why BytePe"].map((item) => <a key={item} href={item === "Home" ? "#top" : item === "Products" ? "#products" : "#benefits"} onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted">{item}</a>)}
-            </div>
+          <nav className="flex flex-col gap-3 border-b border-border px-6 py-4 lg:hidden">
+            {navLinks.map((l) => <a key={l} href="#">{l}</a>)}
           </nav>
         )}
-      </header>
-
-      <main id="top">
         <div className="border-b border-border">
-          <div className="mx-auto flex max-w-7xl gap-3 overflow-x-auto px-4 py-4 md:justify-center md:px-8">
-            {categories.map(({ label, icon: Icon }) => {
-              const active = activeCategory === label;
-              return (
-                <button key={label} onClick={() => setActiveCategory(label)} className={cn("flex min-w-22 flex-col items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-colors", active ? "bg-primary-soft text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
-                  <Icon className="size-5" aria-hidden="true" />{label}
-                </button>
-              );
-            })}
+          <div className="mx-auto flex max-w-[1400px] gap-2 overflow-x-auto px-4 md:justify-center md:px-8">
+            {categories.map(({ label, icon: Icon }) => (
+              <button
+                key={label}
+                onClick={() => setActive(label)}
+                className={cn(
+                  "flex min-w-24 flex-col items-center gap-1 rounded-t-lg border-b-2 px-3 pb-2 pt-3 text-sm text-muted-foreground",
+                  active === label ? "border-primary bg-primary-soft font-semibold text-foreground" : "border-transparent",
+                )}
+              >
+                <Icon className="size-6 stroke-[1.4]" />
+                {label}
+              </button>
+            ))}
           </div>
         </div>
+      </header>
 
-        <section className="mx-auto max-w-7xl px-4 pb-6 pt-5 md:px-8 md:pt-8">
-          <div className="relative min-h-105 overflow-hidden rounded-card bg-hero md:min-h-112">
-            <img src={heroImage} alt="Coral smartphone and wireless earbuds" width={1536} height={864} className="absolute inset-0 size-full object-cover object-[68%_center] md:object-center" />
-            <div className="absolute inset-0 bg-hero-overlay" />
-            <div className="relative z-10 flex min-h-105 max-w-xl flex-col justify-center px-7 py-12 md:min-h-112 md:px-14">
-              <p className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">New on BytePe</p>
-              <h1 className="font-display max-w-56 text-4xl font-semibold leading-tight md:max-w-none md:text-6xl">Big tech.<br />Smaller monthly plans.</h1>
-              <p className="mt-4 max-w-55 text-base leading-7 text-foreground/70 md:max-w-sm">Get the latest phones and audio without paying it all at once.</p>
-              <div className="mt-7 flex items-center gap-4">
-                <Button onClick={() => document.querySelector("#products")?.scrollIntoView({ behavior: "smooth" })}>Shop now <ChevronRight className="size-4" /></Button>
-                <span className="text-sm font-semibold">From ₹699/mo</span>
+      <main className="mx-auto max-w-[1400px] px-4 py-6 md:px-8">
+        {/* Banner */}
+        <section className={cn("relative h-72 overflow-hidden rounded-3xl md:h-[330px]", banner.tone)}>
+          {slide === 0 && <img src={heroImage} alt="" className="absolute inset-0 size-full object-cover" />}
+          <div className="relative flex h-full flex-col justify-center gap-4 bg-gradient-to-r from-hero-overlay to-transparent p-8 md:p-16">
+            <h2 className="text-3xl text-primary-foreground md:text-4xl">{banner.title}</h2>
+            <p className="text-2xl font-bold text-primary-foreground md:text-4xl">{banner.price}</p>
+            <button className="w-fit rounded-full bg-background px-8 py-2 text-sm font-medium">{banner.cta}</button>
+          </div>
+        </section>
+        <div className="mt-4 flex justify-center gap-1.5">
+          {banners.map((_, i) => (
+            <button key={i} onClick={() => setSlide(i)} aria-label={`Slide ${i + 1}`}
+              className={cn("h-1 rounded-full", i === slide ? "w-8 bg-primary" : "w-3 bg-border")} />
+          ))}
+        </div>
+
+        {/* Brands */}
+        <section className="mt-10 flex gap-4 overflow-x-auto pb-2">
+          {brands.map((b) => (
+            <div key={b} className="grid size-28 shrink-0 place-items-center rounded-full bg-muted text-lg font-bold">{b}</div>
+          ))}
+        </section>
+
+        {sections.map((s) => (
+          <section key={s.title} className="mt-12">
+            <h2 className="mb-5 font-display text-3xl">{s.title}</h2>
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {s.items.map((p) => (
+                <article key={p.name} className="w-60 shrink-0">
+                  <div className={cn("relative grid h-52 place-items-center rounded-lg", p.tone)}>
+                    {p.tag && <span className="absolute left-2 top-3 rounded-md bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">{p.tag}</span>}
+                    <p.icon className="size-24 stroke-[1]" />
+                  </div>
+                  <div className="px-2 pt-3 text-sm">
+                    <p className="truncate"><b>{p.brand}</b> {p.name}</p>
+                    <p className="text-xs">From <span className="font-semibold text-primary">{p.monthly}</span></p>
+                    <p className="text-xs font-semibold">{p.price} {p.mrp && <s className="font-normal text-muted-foreground">{p.mrp}</s>}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+
+        {/* Promo grid */}
+        <section className="mt-12 grid gap-4 md:grid-cols-3">
+          {[
+            { t: "iPhone 18 Pro", s: "Now on easy EMI", tone: "bg-product-coral", tall: true },
+            { t: "Flip it, Fold 8", s: "Free Wireless Charging Pad", tone: "bg-product-lilac" },
+            { t: "Macbook Air M5", s: "Upto Rs.30,000 off", tone: "bg-product-blue" },
+          ].map((c) => (
+            <div key={c.t} className={cn("flex h-72 items-end rounded-md p-5 md:h-96", c.tone)}>
+              <div><h3 className="text-xl font-bold">{c.t}</h3><p className="text-sm">{c.s}</p></div>
+            </div>
+          ))}
+        </section>
+
+        <section className="mt-12">
+          <h2 className="mb-5 font-display text-3xl">What's Trending</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {trending.map((t, i) => (
+              <div key={t} className={cn("relative grid h-48 w-80 shrink-0 place-items-center rounded-2xl", ["bg-product-sage", "bg-muted", "bg-product-lilac", "bg-product-sky"][i])}>
+                <span className="grid size-12 place-items-center rounded-full bg-hero-overlay text-primary-foreground"><Play className="size-5" /></span>
+                <span className="absolute bottom-3 left-3 text-sm font-medium">{t}</span>
               </div>
-            </div>
+            ))}
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-12" id="products">
-          <div className="mb-7 flex items-end justify-between gap-4">
-            <div><p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary">Curated for you</p><h2 className="font-display text-3xl font-semibold md:text-4xl">Popular right now</h2></div>
-            <span className="hidden text-sm text-muted-foreground sm:block">{visibleProducts.length} products</span>
-          </div>
-          {visibleProducts.length ? (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
-              {visibleProducts.map((product) => <ProductCard key={product.name} product={product} />)}
-            </div>
-          ) : (
-            <div className="rounded-card border border-border py-20 text-center"><Search className="mx-auto mb-4 size-7 text-muted-foreground" /><p className="font-semibold">No products found</p><p className="mt-1 text-sm text-muted-foreground">Try another search or category.</p></div>
-          )}
-        </section>
-
-        <section id="benefits" className="bg-muted">
-          <div className="mx-auto grid max-w-7xl gap-px px-4 py-12 md:grid-cols-3 md:px-8">
-            <Benefit icon={Zap} title="Zero-cost plans" text="Clear monthly payments with no surprises." />
-            <Benefit icon={ShieldCheck} title="Protected purchases" text="Reliable support from order to delivery." />
-            <Benefit icon={Truck} title="Fast delivery" text="Service across 100+ cities in India." />
+        <section className="mt-12">
+          <h2 className="mb-5 font-display text-3xl">Curious? Here's what makes us different</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {different.map((d, i) => (
+              <div key={d} className={cn("relative grid h-96 w-64 shrink-0 place-items-center rounded-2xl", ["bg-product-sage", "bg-product-sun", "bg-product-coral", "bg-product-sky", "bg-product-lilac"][i])}>
+                <span className="grid size-12 place-items-center rounded-full bg-hero-overlay text-primary-foreground"><Play className="size-5" /></span>
+                <span className="absolute bottom-4 left-4 text-sm font-medium">{d}</span>
+              </div>
+            ))}
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-12 md:px-8">
-          <p className="font-display mb-7 text-center text-2xl font-semibold">Our partners</p>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5 text-sm font-bold text-muted-foreground md:gap-x-16">
-            <span>HDFC BANK</span><span>Uni</span><span>PayU</span><span>razorpay</span><span>LazyPay</span>
+        <section className="mt-12">
+          <h2 className="mb-5 font-display text-3xl">Straight from the customers</h2>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {reviews.map((r) => (
+              <div key={r.name} className="flex h-96 flex-col justify-end rounded-2xl bg-hero p-6 text-primary-foreground">
+                <h3 className="font-display text-2xl">{r.title}</h3>
+                <p className="mt-2 text-xs opacity-80">{r.text}</p>
+                <p className="mt-3 text-sm font-semibold">{r.name}</p>
+                <div className="mt-1 flex gap-0.5 text-product-sun">{[...Array(5)].map((_, i) => <Star key={i} className="size-4 fill-current" />)}</div>
+              </div>
+            ))}
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border bg-muted">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between md:px-8">
-          <div className="flex items-center gap-3"><span className="font-display flex size-9 items-center justify-center rounded-full bg-logo text-xs font-bold text-logo-foreground">BP</span><span>Tech made easier.</span></div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2"><a href="#top" className="hover:text-foreground">About</a><a href="#top" className="hover:text-foreground">Privacy</a><a href="#top" className="hover:text-foreground">Support</a></div>
-          <p>© 2026 BytePe</p>
-        </div>
+      <footer className="mt-16 bg-logo px-8 py-10 text-center text-sm text-logo-foreground">
+        © 2026 BytePe — India's 1st subscription-based tech store
       </footer>
     </div>
   );
-}
-
-function ProductCard({ product }: { product: Product }) {
-  const Icon = product.icon;
-  return (
-    <article className="group overflow-hidden rounded-card border border-border bg-card transition-shadow hover:shadow-card">
-      <div className={cn("relative flex aspect-square items-center justify-center", product.tone)}>
-        <Icon className="size-20 stroke-1 text-foreground/75 transition-transform duration-300 group-hover:scale-105 md:size-28" aria-hidden="true" />
-        <span className="absolute left-3 top-3 rounded-full bg-success-soft px-2.5 py-1 text-xs font-bold text-success">{product.discount}</span>
-        <Button variant="hero" size="icon" className="absolute right-3 top-3 size-9 rounded-full" aria-label={`Save ${product.name}`}><Heart className="size-4" /></Button>
-      </div>
-      <div className="p-4 md:p-5">
-        <p className="text-xs font-medium text-muted-foreground">{product.brand}</p>
-        <h3 className="mt-1 min-h-10 text-sm font-bold leading-5 md:text-base">{product.name}</h3>
-        <div className="mt-3 flex flex-wrap items-baseline gap-2"><span className="text-sm font-bold md:text-base">{product.price}</span><span className="text-xs text-muted-foreground line-through">{product.mrp}</span></div>
-        <p className="mt-2 text-xs font-bold text-primary">From {product.monthly}</p>
-      </div>
-    </article>
-  );
-}
-
-function Benefit({ icon: Icon, title, text }: { icon: typeof Zap; title: string; text: string }) {
-  return <div className="flex gap-4 border-b border-border py-6 md:border-b-0 md:border-r md:px-8 md:last:border-r-0"><span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary"><Icon className="size-5" /></span><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{text}</p></div></div>;
 }
