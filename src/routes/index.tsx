@@ -131,12 +131,12 @@ function Storefront() {
 
         <section className="mx-auto max-w-7xl px-4 pb-6 pt-5 md:px-8 md:pt-8">
           <div className="relative min-h-105 overflow-hidden rounded-card bg-hero md:min-h-112">
-            <img src={heroImage} alt="Coral smartphone and wireless earbuds" width={1536} height={864} className="absolute inset-0 size-full object-cover object-center" />
+            <img src={heroImage} alt="Coral smartphone and wireless earbuds" width={1536} height={864} className="absolute inset-0 size-full object-cover object-[68%_center] md:object-center" />
             <div className="absolute inset-0 bg-hero-overlay" />
             <div className="relative z-10 flex min-h-105 max-w-xl flex-col justify-center px-7 py-12 md:min-h-112 md:px-14">
               <p className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">New on BytePe</p>
-              <h1 className="font-display text-4xl font-semibold leading-tight md:text-6xl">Big tech.<br />Smaller monthly plans.</h1>
-              <p className="mt-4 max-w-sm text-base leading-7 text-foreground/70">Get the latest phones and audio without paying it all at once.</p>
+              <h1 className="font-display max-w-56 text-4xl font-semibold leading-tight md:max-w-none md:text-6xl">Big tech.<br />Smaller monthly plans.</h1>
+              <p className="mt-4 max-w-55 text-base leading-7 text-foreground/70 md:max-w-sm">Get the latest phones and audio without paying it all at once.</p>
               <div className="mt-7 flex items-center gap-4">
                 <Button onClick={() => document.querySelector("#products")?.scrollIntoView({ behavior: "smooth" })}>Shop now <ChevronRight className="size-4" /></Button>
                 <span className="text-sm font-semibold">From ₹699/mo</span>
