@@ -162,9 +162,12 @@ function Storefront() {
         {/* Banner */}
         <section className={cn("relative h-72 overflow-hidden rounded-3xl md:h-[330px]", banner.tone)}>
           {slide === 0 && <img src={heroImage} alt="" className="absolute inset-0 size-full object-cover" />}
-          <div className="relative flex h-full flex-col justify-center gap-4 bg-gradient-to-r from-hero-overlay to-transparent p-8 md:p-16">
-            <h2 className="text-3xl text-primary-foreground md:text-4xl">{banner.title}</h2>
-            <p className="text-2xl font-bold text-primary-foreground md:text-4xl">{banner.price}</p>
+          <div
+            className="relative flex h-full flex-col justify-center gap-4 p-8 md:p-16"
+            style={{ background: "var(--hero-overlay)" }}
+          >
+            <h2 className="text-3xl text-foreground md:text-4xl">{banner.title}</h2>
+            <p className="text-2xl font-bold text-foreground md:text-4xl">{banner.price}</p>
             <button className="w-fit rounded-full bg-background px-8 py-2 text-sm font-medium">{banner.cta}</button>
           </div>
         </section>
