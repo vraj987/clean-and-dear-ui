@@ -1,25 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Briefcase,
   Dumbbell,
   Footprints,
   Headphones,
   Laptop,
-  Menu,
   Play,
   Plug,
-  Search,
   ShoppingBag,
   Smartphone,
   Speaker,
   Star,
   Watch,
   WashingMachine,
-  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import heroImage from "@/assets/bytepe-hero.jpg";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { PageShell } from "@/components/shop/site-shell";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,8 +34,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Storefront,
 });
-
-const navLinks = ["Home", "Subscription", "EMI Store", "Products", "About Us", "Cart", "My Profile"];
 
 const categories = [
   { label: "For You", icon: ShoppingBag },
@@ -105,7 +103,6 @@ const reviews = [
 function Storefront() {
   const [active, setActive] = useState("For You");
   const [slide, setSlide] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setSlide((s) => (s + 1) % banners.length), 4000);
@@ -115,49 +112,7 @@ function Storefront() {
   const banner = banners[slide] ?? banners[0]!;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 bg-background">
-        <div className="mx-auto flex max-w-[1400px] items-center gap-4 border-b border-border px-4 py-3 md:px-8">
-          <div className="grid size-12 shrink-0 place-items-center rounded-full bg-logo font-display text-sm leading-none text-logo-foreground">
-            Byte<br />Pe
-          </div>
-          <label className="flex flex-1 items-center rounded-full bg-muted px-5 py-3 shadow-card">
-            <input className="w-full bg-transparent text-sm outline-none" placeholder="Search for Products, brands..." />
-            <Search className="size-5" />
-          </label>
-          <nav className="hidden gap-6 text-sm lg:flex">
-            {navLinks.map((l, i) => (
-              <a key={l} href="#" className={cn("hover:text-primary", i === 0 && "text-primary")}>{l}</a>
-            ))}
-          </nav>
-          <button className="lg:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
-            {menuOpen ? <X /> : <Menu />}
-          </button>
-        </div>
-        {menuOpen && (
-          <nav className="flex flex-col gap-3 border-b border-border px-6 py-4 lg:hidden">
-            {navLinks.map((l) => <a key={l} href="#">{l}</a>)}
-          </nav>
-        )}
-        <div className="border-b border-border">
-          <div className="mx-auto flex max-w-[1400px] gap-2 overflow-x-auto px-4 md:justify-center md:px-8">
-            {categories.map(({ label, icon: Icon }) => (
-              <button
-                key={label}
-                onClick={() => setActive(label)}
-                className={cn(
-                  "flex min-w-24 flex-col items-center gap-1 rounded-t-lg border-b-2 px-3 pb-2 pt-3 text-sm text-muted-foreground",
-                  active === label ? "border-primary bg-primary-soft font-semibold text-foreground" : "border-transparent",
-                )}
-              >
-                <Icon className="size-6 stroke-[1.4]" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
+    <PageShell>
       <main className="mx-auto max-w-[1400px] px-4 py-6 md:px-8">
         {/* Banner */}
         <section className={cn("relative h-72 overflow-hidden rounded-3xl md:h-[330px]", banner.tone)}>
@@ -168,7 +123,7 @@ function Storefront() {
           >
             <h2 className="text-3xl text-foreground md:text-4xl">{banner.title}</h2>
             <p className="text-2xl font-bold text-foreground md:text-4xl">{banner.price}</p>
-            <button className="w-fit rounded-full bg-background px-8 py-2 text-sm font-medium">{banner.cta}</button>
+            <Button asChild variant="hero" className="w-fit rounded-full px-8"><Link to="/products">{banner.cta}</Link></Button>
           </div>
         </section>
         <div className="mt-4 flex justify-center gap-1.5">
