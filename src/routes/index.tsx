@@ -247,7 +247,7 @@ function Storefront() {
           <h2 className="mb-5 font-display text-3xl">Straight from the customers</h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {reviews.map((r) => (
-              <div key={r.name} className="flex h-96 flex-col justify-end rounded-2xl bg-hero p-6 text-primary-foreground">
+              <div key={r.name} className="flex h-96 flex-col justify-end rounded-2xl bg-hero p-6 text-foreground">
                 <h3 className="font-display text-2xl">{r.title}</h3>
                 <p className="mt-2 text-xs opacity-80">{r.text}</p>
                 <p className="mt-3 text-sm font-semibold">{r.name}</p>
