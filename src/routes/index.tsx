@@ -112,7 +112,7 @@ function Storefront() {
     return () => clearInterval(t);
   }, []);
 
-  const banner = banners[slide];
+  const banner = banners[slide] ?? banners[0]!;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
