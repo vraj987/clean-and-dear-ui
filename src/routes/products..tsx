@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { catalog } from "@/lib/catalog";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
-export const Route = createFileRoute("/products/$slug")({
+export const Route = createFileRoute("/products/")({
   beforeLoad: ({ params }) => { 
     const product = catalog.find(p => p.slug === params.slug);
     if (!product) throw notFound(); 
