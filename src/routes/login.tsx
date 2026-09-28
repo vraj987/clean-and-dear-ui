@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export const Route = createFileRoute("/login" as any)({
-  head: () => ({ meta: [{ title: "Login — BytePe" }] }),
+export const Route = createFileRoute("/login")({
+  head: () => ({ meta: [{ title: "Login — BytePe" }, { name: "description", content: "Sign in to view your BytePe profile and orders." }, { property: "og:title", content: "Login — BytePe" }, { property: "og:description", content: "Sign in to view your BytePe profile and orders." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: LoginPage,
 });
 
