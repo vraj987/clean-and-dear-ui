@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, User, MapPin, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "My Profile — BytePe" }, { name: "description", content: "View your BytePe profile, orders and subscriptions." }] }),
