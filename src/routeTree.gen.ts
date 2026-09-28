@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as CheckoutAddressRouteImport } from './routes/checkout.address'
 import { Route as CheckoutPaymentRouteImport } from './routes/checkout.payment'
@@ -22,9 +24,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubscriptionRoute = SubscriptionRouteImport.update({
@@ -55,7 +67,9 @@ const ProductsSlugRoute = ProductsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
+  '/profile': typeof ProfileRoute
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
@@ -64,7 +78,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
+  '/profile': typeof ProfileRoute
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
@@ -74,7 +90,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
+  '/profile': typeof ProfileRoute
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
@@ -85,7 +103,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/cart'
+    | '/profile'
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
@@ -94,7 +114,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/cart'
+    | '/profile'
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
@@ -103,7 +125,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/cart'
+    | '/profile'
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
@@ -113,7 +137,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   CartRoute: typeof CartRoute
+  ProfileRoute: typeof ProfileRoute
   SubscriptionRoute: typeof SubscriptionRoute
   CheckoutAddressRoute: typeof CheckoutAddressRoute
   CheckoutPaymentRoute: typeof CheckoutPaymentRoute
@@ -130,11 +156,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cart': {
       id: '/cart'
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subscription': {
@@ -177,7 +217,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   CartRoute: CartRoute,
+  ProfileRoute: ProfileRoute,
   SubscriptionRoute: SubscriptionRoute,
   CheckoutAddressRoute: CheckoutAddressRoute,
   CheckoutPaymentRoute: CheckoutPaymentRoute,
