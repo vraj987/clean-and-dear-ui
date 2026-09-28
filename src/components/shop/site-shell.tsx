@@ -24,7 +24,7 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
           <Search className="size-5 shrink-0" />
         </label>
         <nav className="hidden items-center gap-5 text-sm lg:flex">
-          {nav.map((item) => <Link key={item.label} to={item.to} activeProps={{ className: "text-primary" }} activeOptions={item.to === "/" ? { exact: true } : undefined} className="whitespace-nowrap transition-colors hover:text-primary">{item.label}</Link>)}
+          {nav.map((item) => <Link key={item.label} to={item.to} activeProps={{ className: "text-primary" }} activeOptions={{ exact: item.to === "/" }} className="whitespace-nowrap transition-colors hover:text-primary">{item.label}</Link>)}
         </nav>
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu">{open ? <X /> : <Menu />}</Button>
       </div>

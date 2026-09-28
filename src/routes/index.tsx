@@ -212,10 +212,6 @@ function Storefront() {
           </div>
         </section>
       </main>
-
-      <footer className="mt-16 bg-logo px-8 py-10 text-center text-sm text-logo-foreground">
-        © 2026 BytePe — India's 1st subscription-based tech store
-      </footer>
-    </div>
+    </PageShell>
   );
 }
