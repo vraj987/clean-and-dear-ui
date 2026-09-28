@@ -12,9 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as CartRouteImport } from './routes/cart'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as CheckoutAddressRouteImport } from './routes/checkout.address'
 import { Route as CheckoutPaymentRouteImport } from './routes/checkout.payment'
@@ -36,19 +34,9 @@ const CartRoute = CartRouteImport.update({
   path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubscriptionRoute = SubscriptionRouteImport.update({
@@ -81,9 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
-  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
-  '/signup': typeof SignupRoute
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
@@ -94,9 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
-  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
-  '/signup': typeof SignupRoute
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
@@ -108,9 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
-  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
-  '/signup': typeof SignupRoute
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
@@ -123,9 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/cart'
-    | '/login'
     | '/profile'
-    | '/signup'
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
@@ -136,9 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/cart'
-    | '/login'
     | '/profile'
-    | '/signup'
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
@@ -149,9 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/cart'
-    | '/login'
     | '/profile'
-    | '/signup'
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
@@ -163,9 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   CartRoute: typeof CartRoute
-  LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
-  SignupRoute: typeof SignupRoute
   SubscriptionRoute: typeof SubscriptionRoute
   CheckoutAddressRoute: typeof CheckoutAddressRoute
   CheckoutPaymentRoute: typeof CheckoutPaymentRoute
@@ -196,25 +170,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subscription': {
@@ -259,9 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   CartRoute: CartRoute,
-  LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
-  SignupRoute: SignupRoute,
   SubscriptionRoute: SubscriptionRoute,
   CheckoutAddressRoute: CheckoutAddressRoute,
   CheckoutPaymentRoute: CheckoutPaymentRoute,
