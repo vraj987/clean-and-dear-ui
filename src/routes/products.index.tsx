@@ -1,12 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Check, ChevronDown, SlidersHorizontal, Star, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { PageShell } from "@/components/shop/site-shell";
-import { catalog } from "@/lib/catalog";
 import { ProductCard } from "@/components/shop/product-card";
+import { Button } from "@/components/ui/button";
+import { brands, catalog, categories } from "@/lib/catalog";
+
+type Search = { brand?: string; category?: string; q?: string };
 export const Route = createFileRoute("/products/")({
-  head: () => ({ meta: [{ title: "All Products — BytePe" }, { name: "description", content: "Browse phones, audio and more on easy monthly EMI." }, { property: "og:title", content: "All Products — BytePe" }, { property: "og:description", content: "Browse phones, audio and more on easy monthly EMI." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
-  component: Page,
+  validateSearch: (search: Record<string, unknown>): Search => ({ brand: typeof search.brand === "string" ? search.brand : undefined, category: typeof search.category === "string" ? search.category : undefined, q: typeof search.q === "string" ? search.q : undefined }),
+  head: () => ({ meta: [{ title: "All Products — BytePe" }, { name: "description", content: "Browse and filter phones, audio and electronics on easy monthly EMI." }, { property: "og:title", content: "All Products — BytePe" }, { property: "og:description", content: "Find your next device from leading brands." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  component: ProductsPage,
 });
 
-function Page() {
-  return <PageShell><main className="mx-auto max-w-[1400px] px-4 py-8 md:px-8"><h1 className="font-display text-3xl">All Products</h1><div className="mt-6 flex flex-wrap gap-4">{catalog.map((p) => <ProductCard key={p.slug} product={p} />)}</div></main></PageShell>;
+function ProductsPage() {
+  const search = Route.useSearch();
+  const [drawer, setDrawer] = useState(false);
+  const [brand, setBrand] = useState(search.brand ?? "All");
+  const [category, setCategory] = useState(search.category ?? "All");
+  const [sort, setSort] = useState("Featured");
+  const [topRated, setTopRated] = useState(false);
+  const products = useMemo(() => {
+    const q = (search.q ?? "").toLowerCase();
+    const filtered = catalog.filter((p) => (brand === "All" || p.brand.toLowerCase() === brand.toLowerCase()) && (category === "All" || p.category === category) && (!q || `${p.brand} ${p.name} ${p.category}`.toLowerCase().includes(q)) && (!topRated || p.rating >= 4.8));
+    return [...filtered].sort((a, b) => sort === "Rating" ? b.rating - a.rating : sort === "Price: Low" ? Number(a.price.replace(/\D/g, "")) - Number(b.price.replace(/\D/g, "")) : 0);
+  }, [brand, category, search.q, sort, topRated]);
+  return <PageShell><main className="mx-auto max-w-[1400px] px-4 py-7 md:px-8"><div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4"><div className="min-w-0"><p className="text-xs font-semibold uppercase text-primary">EMI Store</p><h1 className="truncate font-display text-3xl md:text-4xl">{brand === "All" ? "All Products" : brand}</h1><p className="mt-1 text-sm text-muted-foreground">{products.length} products found</p></div><Button variant="outline" onClick={() => setDrawer(true)}><SlidersHorizontal className="size-4" />Filters</Button></div><div className="mt-6 flex flex-wrap gap-2"><label className="flex items-center gap-2 rounded-full border border-border px-4 text-sm"><span>Sort</span><select value={sort} onChange={(e) => setSort(e.target.value)} className="h-10 bg-transparent outline-none"><option>Featured</option><option>Rating</option><option>Price: Low</option></select><ChevronDown className="size-4" /></label><Button variant={topRated ? "default" : "outline"} className="rounded-full" onClick={() => setTopRated((v) => !v)}><Star className="size-4" />Top Rated</Button>{brand !== "All" && <Button variant="ghost" className="rounded-full" onClick={() => setBrand("All")}><X className="size-4" />{brand}</Button>}</div><div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">{products.map((product) => <ProductCard key={product.slug} product={product} />)}</div>{products.length === 0 && <div className="py-24 text-center"><PackageEmpty /><h2 className="mt-3 font-display text-2xl">No products match</h2><Button className="mt-4" onClick={() => { setBrand("All"); setCategory("All"); setTopRated(false); }}>Clear filters</Button></div>}</main>{drawer && <div className="fixed inset-0 z-[70] bg-foreground/35" onClick={() => setDrawer(false)}><aside className="ml-auto flex h-full w-[min(92vw,520px)] flex-col bg-background shadow-card" onClick={(e) => e.stopPropagation()}><div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border p-5"><Button size="icon" variant="ghost" onClick={() => setDrawer(false)}><X /></Button><h2 className="font-display text-2xl">Filter</h2><button className="text-sm font-semibold text-primary" onClick={() => { setBrand("All"); setCategory("All"); }}>Reset</button></div><div className="grid min-h-0 flex-1 grid-cols-[130px_minmax(0,1fr)]"><div className="border-r border-border bg-muted p-3"><p className="rounded-md bg-background px-3 py-3 text-sm font-semibold text-primary">Brand</p><p className="px-3 py-3 text-sm">Category</p><p className="px-3 py-3 text-sm">Monthly Price</p><p className="px-3 py-3 text-sm">Storage</p></div><div className="overflow-y-auto p-5"><p className="mb-4 text-xs font-semibold uppercase text-muted-foreground">Choose brand</p>{["All", ...brands].map((value) => <label key={value} className="flex cursor-pointer items-center justify-between border-b border-border py-3 text-sm"><span className="flex items-center gap-3"><input type="radio" name="brand" checked={brand === value} onChange={() => setBrand(value)} className="accent-[var(--primary)]" />{value}</span><small className="text-muted-foreground">{value === "All" ? catalog.length : catalog.filter((p) => p.brand === value).length}</small></label>)}<p className="mb-3 mt-8 text-xs font-semibold uppercase text-muted-foreground">Category</p>{["All", ...categories].map((value) => <label key={value} className="mr-2 inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-3 py-2 text-sm"><input type="radio" name="category" checked={category === value} onChange={() => setCategory(value)} className="accent-[var(--primary)]" />{value}</label>)}</div></div><div className="grid grid-cols-2 gap-3 border-t border-border p-4"><Button variant="outline" onClick={() => setDrawer(false)}>Cancel</Button><Button onClick={() => setDrawer(false)}><Check className="size-4" />Apply ({products.length})</Button></div></aside></div>}</PageShell>;
 }
+
+function PackageEmpty() { return <SlidersHorizontal className="mx-auto size-10 text-muted-foreground" />; }
