@@ -60,7 +60,12 @@
   --logo: oklch(0.13 0.005 45);
   --logo-foreground: oklch(1 0 0);
   --hero: oklch(0.89 0.01 55);
-  --hero-overlay: linear-gradient(90deg, oklch(0.96 0.008 55 / 0.98) 0%, oklch(0.96 0.008 55 / 0.84) 38%, oklch(0.96 0.008 55 / 0.06) 72%);
+  --hero-overlay: linear-gradient(
+    90deg,
+    oklch(0.96 0.008 55 / 0.98) 0%,
+    oklch(0.96 0.008 55 / 0.84) 38%,
+    oklch(0.96 0.008 55 / 0.06) 72%
+  );
   --product-coral: oklch(0.94 0.035 30);
   --product-blue: oklch(0.94 0.025 235);
   --product-sage: oklch(0.94 0.025 150);
@@ -71,17 +76,53 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); }
-  button, a, input { letter-spacing: 0; }
-  button, a { -webkit-tap-highlight-color: transparent; }
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+  button,
+  a,
+  input {
+    letter-spacing: 0;
+  }
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 @media (max-width: 640px) {
-  :root { --hero-overlay: linear-gradient(90deg, oklch(0.97 0.006 55 / 0.97) 0%, oklch(0.97 0.006 55 / 0.84) 60%, oklch(0.97 0.006 55 / 0.2) 100%); }
+  :root {
+    --hero-overlay: linear-gradient(
+      90deg,
+      oklch(0.97 0.006 55 / 0.97) 0%,
+      oklch(0.97 0.006 55 / 0.84) 60%,
+      oklch(0.97 0.006 55 / 0.2) 100%
+    );
+  }
+}
+
+.package-active-tab {
+  transform: none;
+  border-radius: 1.25rem 1.25rem 0 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+  .package-active-tab {
+    transform: none !important;
+  }
 }
