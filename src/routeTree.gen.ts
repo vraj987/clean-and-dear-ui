@@ -16,6 +16,10 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as CheckoutAddressRouteImport } from './routes/checkout.address'
 import { Route as CheckoutPaymentRouteImport } from './routes/checkout.payment'
+import { Route as InspectionIndexRouteImport } from './routes/inspection.index'
+import { Route as InspectionCustomerIdRouteImport } from './routes/inspection.$customerId'
+import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as ProductsIndexRouteImport } from './routes/products.index'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 
@@ -54,6 +58,26 @@ const CheckoutPaymentRoute = CheckoutPaymentRouteImport.update({
   path: '/checkout/payment',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InspectionIndexRoute = InspectionIndexRouteImport.update({
+  id: '/inspection/',
+  path: '/inspection/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InspectionCustomerIdRoute = InspectionCustomerIdRouteImport.update({
+  id: '/inspection/$customerId',
+  path: '/inspection/$customerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersIndexRoute = OrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsIndexRoute = ProductsIndexRouteImport.update({
   id: '/products/',
   path: '/products/',
@@ -73,7 +97,11 @@ export interface FileRoutesByFullPath {
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
+  '/inspection/$customerId': typeof InspectionCustomerIdRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/inspection/': typeof InspectionIndexRoute
+  '/orders/': typeof OrdersIndexRoute
   '/products/': typeof ProductsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -84,7 +112,11 @@ export interface FileRoutesByTo {
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
+  '/inspection/$customerId': typeof InspectionCustomerIdRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/inspection': typeof InspectionIndexRoute
+  '/orders': typeof OrdersIndexRoute
   '/products': typeof ProductsIndexRoute
 }
 export interface FileRoutesById {
@@ -96,7 +128,11 @@ export interface FileRoutesById {
   '/subscription': typeof SubscriptionRoute
   '/checkout/address': typeof CheckoutAddressRoute
   '/checkout/payment': typeof CheckoutPaymentRoute
+  '/inspection/$customerId': typeof InspectionCustomerIdRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/inspection/': typeof InspectionIndexRoute
+  '/orders/': typeof OrdersIndexRoute
   '/products/': typeof ProductsIndexRoute
 }
 export interface FileRouteTypes {
@@ -109,7 +145,11 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
+    | '/inspection/$customerId'
+    | '/orders/$orderId'
     | '/products/$slug'
+    | '/inspection/'
+    | '/orders/'
     | '/products/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -120,7 +160,11 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
+    | '/inspection/$customerId'
+    | '/orders/$orderId'
     | '/products/$slug'
+    | '/inspection'
+    | '/orders'
     | '/products'
   id:
     | '__root__'
@@ -131,7 +175,11 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/checkout/address'
     | '/checkout/payment'
+    | '/inspection/$customerId'
+    | '/orders/$orderId'
     | '/products/$slug'
+    | '/inspection/'
+    | '/orders/'
     | '/products/'
   fileRoutesById: FileRoutesById
 }
@@ -143,7 +191,11 @@ export interface RootRouteChildren {
   SubscriptionRoute: typeof SubscriptionRoute
   CheckoutAddressRoute: typeof CheckoutAddressRoute
   CheckoutPaymentRoute: typeof CheckoutPaymentRoute
+  InspectionCustomerIdRoute: typeof InspectionCustomerIdRoute
+  OrdersOrderIdRoute: typeof OrdersOrderIdRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
+  InspectionIndexRoute: typeof InspectionIndexRoute
+  OrdersIndexRoute: typeof OrdersIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
 }
 
@@ -198,6 +250,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutPaymentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inspection/': {
+      id: '/inspection/'
+      path: '/inspection'
+      fullPath: '/inspection/'
+      preLoaderRoute: typeof InspectionIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inspection/$customerId': {
+      id: '/inspection/$customerId'
+      path: '/inspection/$customerId'
+      fullPath: '/inspection/$customerId'
+      preLoaderRoute: typeof InspectionCustomerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders/': {
+      id: '/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof OrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders/$orderId': {
+      id: '/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof OrdersOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products/': {
       id: '/products/'
       path: '/products'
@@ -223,7 +303,11 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionRoute: SubscriptionRoute,
   CheckoutAddressRoute: CheckoutAddressRoute,
   CheckoutPaymentRoute: CheckoutPaymentRoute,
+  InspectionCustomerIdRoute: InspectionCustomerIdRoute,
+  OrdersOrderIdRoute: OrdersOrderIdRoute,
   ProductsSlugRoute: ProductsSlugRoute,
+  InspectionIndexRoute: InspectionIndexRoute,
+  OrdersIndexRoute: OrdersIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
 }
 export const routeTree = rootRouteImport
