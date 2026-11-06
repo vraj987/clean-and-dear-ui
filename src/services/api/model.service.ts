@@ -5,3 +5,7 @@ import { unwrapApiResult } from "./response";
 export async function getModels(brandId: string) {
   return unwrapApiResult(await postApi<ModelRecord[]>("models", { brand_id: brandId }));
 }
+
+export async function getAllModels() {
+  return getModels("");
+}

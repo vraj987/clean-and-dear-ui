@@ -8,6 +8,7 @@ type SearchableSelectProps = {
   value: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
+  disabledPlaceholder?: string;
   disabled?: boolean;
   loading?: boolean;
   className?: string;
@@ -18,6 +19,7 @@ export function SearchableSelect({
   value,
   onValueChange,
   placeholder = "Search or select…",
+  disabledPlaceholder = "Choose a state first",
   disabled = false,
   loading = false,
   className = "",
@@ -45,7 +47,7 @@ export function SearchableSelect({
           autoComplete="off"
           disabled={disabled}
           value={open ? query : (selected?.label ?? "")}
-          placeholder={disabled ? "Choose a state first" : placeholder}
+          placeholder={disabled ? disabledPlaceholder : placeholder}
           onFocus={() => {
             setQuery("");
             setOpen(true);
@@ -90,7 +92,7 @@ export function SearchableSelect({
                     setQuery("");
                     setOpen(false);
                   }}
-                  className={`w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-red-50 hover:text-primary ${option.value === value ? "bg-red-50 font-semibold text-primary" : ""}`}
+                  className={`w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-primary-soft hover:text-primary ${option.value === value ? "bg-primary-soft font-semibold text-primary" : ""}`}
                 >
                   {option.label}
                 </button>

@@ -3,7 +3,7 @@ export { getBrands } from "./brand.service";
 export { getCategories } from "./category.service";
 export { getModels } from "./model.service";
 export { getPackages } from "./package.service";
-export { getSubscriptionProducts } from "./product.service";
+export { getProductVariants, getSubscriptionProducts } from "./product.service";
 export { getCities } from "./city.service";
 export { getStates } from "./state.service";
 export type {

@@ -1,7 +1,7 @@
-import { getApi } from "./client";
+import { postApi } from "./client";
 import { unwrapApiResult } from "./response";
 import type { BrandRecord } from "./models";
 
 export async function getBrands() {
-  return unwrapApiResult(await getApi<BrandRecord[]>("brands"));
+  return unwrapApiResult(await postApi<BrandRecord[]>("brands", {}));
 }

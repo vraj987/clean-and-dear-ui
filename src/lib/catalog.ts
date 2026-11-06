@@ -1,11 +1,12 @@
 import catalogProducts from "@/assets/catalog-products.jpg";
 import phoneBlue from "@/assets/phone-blue-gallery.jpg";
+import type { ProductVariantRecord, SubscriptionProduct } from "@/services/api/models";
 
 export type CatalogItem = {
   brand: string;
   name: string;
   slug: string;
-  category: "Mobile" | "Audio" | "Electronics" | "Footwear" | "Wearables" | "Accessories";
+  category: string;
   monthly: string;
   price: string;
   mrp?: string;
@@ -15,6 +16,19 @@ export type CatalogItem = {
   imagePosition?: string;
   tone: string;
   storage: string[];
+  productId?: string;
+  productType?: string;
+  wishlistId?: string;
+  brandId?: string;
+  modelId?: string;
+  modelName?: string;
+  retailerPrice?: string;
+  variant?: string;
+  shortDescription?: string;
+  longDescription?: string;
+  galleryImages?: string[];
+  packages?: SubscriptionProduct["packages"];
+  variants?: ProductVariantRecord[];
 };
 
 export const catalog: CatalogItem[] = [
@@ -379,4 +393,62 @@ export const categories = [
 
 export function getProduct(slug: string) {
   return catalog.find((product) => product.slug === slug);
+}
+
+export function mapApiProduct(record: SubscriptionProduct): CatalogItem {
+  const hasImagePath = (value: string) => {
+    const path = value.trim().split(/[?#]/, 1)[0]?.toLowerCase() ?? "";
+    return /^data:image\//i.test(value.trim()) || /\.(?:avif|bmp|gif|jpe?g|png|svg|webp|heic|heif)$/.test(path);
+  };
+  const normalizeImage = (value: string, base = "") => {
+    const image = value.trim();
+    if (!image || /^(?:null|undefined|none|n\/a|-)$/i.test(image)) return "";
+    if (/^(https?:)?\/\//i.test(image) || image.startsWith("data:")) return image;
+    return base ? `${base.replace(/\/$/, "")}/${image.replace(/^\//, "")}` : "";
+  };
+  const galleryValues = (record.product_images_url || record.product_images || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(hasImagePath);
+  const firstAbsolute = galleryValues.find((value) => /^https?:\/\//i.test(value));
+  const productBase = firstAbsolute?.slice(0, firstAbsolute.lastIndexOf("/")) ??
+    (record.model_image_url ?? "").replace(/\/model\/[^/]+$/, "/product");
+  const gallery = galleryValues.map((value) => normalizeImage(value, productBase)).filter(hasImagePath);
+  const mainProductImage = normalizeImage(record.product_image_url || record.product_image || "", productBase);
+  const usableMainImage = hasImagePath(mainProductImage) ? mainProductImage : "";
+  const image = usableMainImage || gallery[0] || record.model_image_url || "";
+  const parsedPrice = Number(record.retailer_price ?? record.original_price ?? record.purchase_price ?? 0);
+  const priceAmount = Number.isFinite(parsedPrice) && parsedPrice > 0 ? parsedPrice : 0;
+  const parsedMrp = Number(record.mrp ?? 0);
+  const mrpAmount = Number.isFinite(parsedMrp) && parsedMrp > priceAmount ? parsedMrp : 0;
+  const storage = record.product_variant?.match(/\b\d+(?:\.\d+)?\s*(?:TB|GB)\b/i)?.[0] ?? record.product_variant ?? "Standard";
+  const category = record.category_name || "";
+  const name = record.pro_name || [record.brand_name, record.model_name, record.product_variant].filter(Boolean).join(" ");
+  const monthlyAmount = Number(record.retailer_price_monthly ?? 0) || (priceAmount ? Math.round(priceAmount / 24) : 0);
+  return {
+    brand: record.brand_name || "",
+    name,
+    slug: `product-${record.product_id}`,
+    category,
+    monthly: monthlyAmount ? `₹${monthlyAmount.toLocaleString("en-IN")}/mo` : "—/mo",
+    price: priceAmount ? `₹${priceAmount.toLocaleString("en-IN")}` : "",
+    ...(mrpAmount ? { mrp: `₹${mrpAmount.toLocaleString("en-IN")}` } : {}),
+    rating: 0,
+    image,
+    tone: "bg-muted",
+    storage: [storage],
+    productId: record.product_id,
+    ...(record.product_type !== undefined ? { productType: String(record.product_type) } : {}),
+    ...(record.wishlist_id ? { wishlistId: record.wishlist_id } : {}),
+    ...(record.brand_id ? { brandId: record.brand_id } : {}),
+    ...(record.model_id ? { modelId: record.model_id } : {}),
+    ...(record.model_name ? { modelName: record.model_name } : {}),
+    ...(record.retailer_price ? { retailerPrice: record.retailer_price } : {}),
+    variant: record.product_variant,
+    ...(record.short_description ? { shortDescription: record.short_description } : {}),
+    ...(record.long_description ? { longDescription: record.long_description } : {}),
+    galleryImages: [...new Set([usableMainImage, ...gallery].filter(hasImagePath))],
+    packages: record.packages ?? [],
+    variants: record.product_varient ?? [],
+  };
 }

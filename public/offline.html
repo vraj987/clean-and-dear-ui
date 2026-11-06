@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#082d52" />
+    <meta name="robots" content="noindex" />
+    <title>You’re offline | Kimaat Lock</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #102c4d;
+        background: #f5f8fc;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+      }
+      * { box-sizing: border-box; }
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        min-height: 100svh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(ellipse at 12% 8%, rgb(245 130 32 / 10%), transparent 34%),
+          radial-gradient(ellipse at 90% 90%, rgb(0 119 160 / 10%), transparent 32%),
+          #f5f8fc;
+      }
+      .offline-card {
+        width: min(100%, 560px);
+        overflow: hidden;
+        border: 1px solid #e1e8ef;
+        border-radius: 28px;
+        background: #fff;
+        box-shadow: 0 24px 70px rgb(8 45 82 / 12%);
+        animation: arrive 550ms cubic-bezier(.2,.75,.25,1) both;
+      }
+      .brand-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 22px 28px;
+        border-bottom: 1px solid #edf1f5;
+      }
+      .brand-mark {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 14px;
+        color: white;
+        background: linear-gradient(145deg, #0b3765, #07577a);
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -2px;
+      }
+      .brand-name { font-size: 17px; font-weight: 800; letter-spacing: -.04em; }
+      .brand-name span { color: #f58220; }
+      .content { padding: 38px 38px 34px; text-align: center; }
+      .illustration {
+        position: relative;
+        display: grid;
+        width: 142px;
+        height: 142px;
+        margin: 0 auto 26px;
+        place-items: center;
+        border: 1px solid #e4edf5;
+        border-radius: 42px;
+        background: linear-gradient(145deg, #f3f8fc, #fff);
+      }
+      .signal {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        width: 14px;
+        height: 14px;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        background: #f58220;
+        box-shadow: 0 0 0 5px rgb(245 130 32 / 14%);
+      }
+      h1 { margin: 0; font-size: clamp(29px, 7vw, 38px); line-height: 1.13; letter-spacing: -.045em; }
+      .lead { max-width: 410px; margin: 14px auto 0; color: #64758a; font-size: 16px; line-height: 1.65; }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 22px;
+        padding: 8px 12px;
+        border: 1px solid #f3dfcc;
+        border-radius: 999px;
+        color: #995015;
+        background: #fff8f1;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #f58220; }
+      .actions { display: flex; justify-content: center; margin-top: 28px; }
+      button {
+        min-height: 50px;
+        padding: 0 24px;
+        border: 0;
+        border-radius: 15px;
+        color: #fff;
+        background: linear-gradient(110deg, #0b2a55, #075b78);
+        box-shadow: 0 9px 20px rgb(11 42 85 / 18%);
+        font: inherit;
+        font-size: 15px;
+        font-weight: 750;
+        cursor: pointer;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+      button:hover { transform: translateY(-2px); box-shadow: 0 13px 24px rgb(11 42 85 / 23%); }
+      button:focus-visible { outline: 3px solid #f58220; outline-offset: 3px; }
+      .hint { margin: 18px 0 0; color: #8592a2; font-size: 13px; line-height: 1.55; }
+      .footer { padding: 16px 24px; border-top: 1px solid #edf1f5; color: #8793a2; font-size: 12px; text-align: center; }
+      @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+      @media (max-width: 480px) {
+        body { padding: 16px; }
+        .offline-card { border-radius: 24px; }
+        .brand-bar { padding: 18px 20px; }
+        .content { padding: 30px 22px 28px; }
+        .illustration { width: 124px; height: 124px; margin-bottom: 22px; border-radius: 36px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="offline-card" aria-labelledby="offline-title">
+      <header class="brand-bar" aria-label="Kimaat Lock">
+        <div class="brand-mark" aria-hidden="true">K</div>
+        <div class="brand-name">KIMAAT<span>LOCK</span></div>
+      </header>
+      <section class="content">
+        <div class="illustration" aria-hidden="true">
+          <span class="signal"></span>
+          <svg width="76" height="76" viewBox="0 0 76 76" fill="none" role="presentation">
+            <path d="M12 27.5C26.2 14.4 49.8 14.4 64 27.5M21.5 37c9.1-8.4 23.9-8.4 33 0M31 46.5c3.9-3.6 10.1-3.6 14 0" stroke="#0B4772" stroke-width="5" stroke-linecap="round"/>
+            <path d="M38 57h.1" stroke="#F58220" stroke-width="7" stroke-linecap="round"/>
+            <path d="m15 15 46 46" stroke="#F58220" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1 id="offline-title">You’re offline</h1>
+        <p class="lead">We can’t reach Kimaat Lock right now. Check your internet connection and try again when you’re back online.</p>
+        <div class="status" role="status"><span class="status-dot"></span><span id="connection-status">No internet connection</span></div>
+        <div class="actions">
+          <button type="button" onclick="window.location.reload()">Try again</button>
+        </div>
+        <p class="hint">Your account and order details are safe. This page will retry when you choose.</p>
+      </section>
+      <footer class="footer">Aaj phone lo, kal ki kimmat fix karo.</footer>
+    </main>
+    <script>
+      const status = document.getElementById("connection-status");
+      function updateConnectionStatus() {
+        const online = navigator.onLine;
+        status.textContent = online ? "Connection restored · tap Try again" : "No internet connection";
+      }
+      window.addEventListener("online", updateConnectionStatus);
+      window.addEventListener("offline", updateConnectionStatus);
+      updateConnectionStatus();
+    </script>
+  </body>
+</html>

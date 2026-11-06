@@ -1,0 +1,23 @@
+RewriteEngine On
+
+# PDF.js can request module workers directly in some browser fallbacks.
+<IfModule mod_mime.c>
+  AddType application/javascript .mjs
+</IfModule>
+
+# Ask browsers to revalidate the app shell after each upload so customers load the latest build.
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|sw\.js)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>
+
+# Serve existing files (assets, PHP API endpoints, and public files) directly.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route application paths such as /orders/14 to the React entry page.
+RewriteRule ^ index.html [L]

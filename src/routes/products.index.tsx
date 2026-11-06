@@ -1,30 +1,36 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronDown, SlidersHorizontal, Star, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PageShell } from "@/components/shop/site-shell";
 import { ProductCard } from "@/components/shop/product-card";
 import { Button } from "@/components/ui/button";
-import { brands, catalog, categories } from "@/lib/catalog";
+import { mapApiProduct } from "@/lib/catalog";
 import { getBrands } from "@/services/api/brand.service";
 import { getCategories } from "@/services/api/category.service";
-import { getModels } from "@/services/api/model.service";
-import type { BrandRecord, CategoryRecord, ModelRecord } from "@/services/api/models";
+import { getAllModels } from "@/services/api/model.service";
+import { getProducts } from "@/services/api/product.service";
+import type { ModelRecord } from "@/services/api/models";
+import { apiQueryKeys } from "@/services/api/query-keys";
+import { readAuthSession } from "@/services/api/auth";
 
-type Search = { brand?: string; category?: string; q?: string };
+type Search = { brand?: string; category?: string; model_id?: string; q?: string };
+const PRODUCTS_PAGE_SIZE = 12;
 export const Route = createFileRoute("/products/")({
   validateSearch: (search: Record<string, unknown>): Search => ({
     ...(typeof search["brand"] === "string" ? { brand: search["brand"] } : {}),
     ...(typeof search["category"] === "string" ? { category: search["category"] } : {}),
+    ...(typeof search["model_id"] === "string" ? { model_id: search["model_id"] } : {}),
     ...(typeof search["q"] === "string" ? { q: search["q"] } : {}),
   }),
   head: () => ({
     meta: [
-      { title: "All Products — BytePe" },
+      { title: "All Products — Kimaat Lock" },
       {
         name: "description",
         content: "Browse and filter phones, audio and electronics on easy monthly EMI.",
       },
-      { property: "og:title", content: "All Products — BytePe" },
+      { property: "og:title", content: "All Products — Kimaat Lock" },
       { property: "og:description", content: "Find your next device from leading brands." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -34,145 +40,202 @@ export const Route = createFileRoute("/products/")({
 });
 
 function ProductsPage() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate({ from: "/products/" });
+  const accountId = readAuthSession()?.accountId ?? "";
   const search = Route.useSearch();
   const searchBrand = search["brand"];
   const searchCategory = search["category"];
+  const searchModelId = search["model_id"];
   const [drawer, setDrawer] = useState(false);
-  const [brand, setBrand] = useState(searchBrand ?? "All");
-  const [category, setCategory] = useState(searchCategory ?? "All");
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(searchBrand && searchBrand !== "All" ? [searchBrand] : []);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(searchCategory && searchCategory !== "All" ? [searchCategory] : []);
   const [sort, setSort] = useState("Featured");
   const [topRated, setTopRated] = useState(false);
-  const [apiBrands, setApiBrands] = useState<BrandRecord[]>([]);
-  const [apiCategories, setApiCategories] = useState<CategoryRecord[]>([]);
-  const [models, setModels] = useState<ModelRecord[]>([]);
-  const [model, setModel] = useState("All");
-  const [modelsLoading, setModelsLoading] = useState(false);
+  const [selectedModels, setSelectedModels] = useState<string[]>(searchModelId ? [searchModelId] : []);
+  const [apiProducts, setApiProducts] = useState<ReturnType<typeof mapApiProduct>[]>([]);
+  const apiProductsRef = useRef(apiProducts);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreProducts, setHasMoreProducts] = useState(false);
+  const [paginationError, setPaginationError] = useState("");
+  const paginationSentinelRef = useRef<HTMLDivElement>(null);
+  const pendingProductsRef = useRef<ReturnType<typeof mapApiProduct>[]>([]);
+  const serverMayHaveMoreRef = useRef(false);
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(999999);
   const [activeFilter, setActiveFilter] = useState<"brand" | "category" | "model" | "price">(
     "brand",
   );
+  const brandsQuery = useQuery({ queryKey: apiQueryKeys.brands, queryFn: getBrands });
+  const categoriesQuery = useQuery({ queryKey: apiQueryKeys.categories, queryFn: getCategories });
+  const allModelsQuery = useQuery({ queryKey: apiQueryKeys.allModels, queryFn: getAllModels });
+  const firstPageQuery = useQuery({
+    queryKey: apiQueryKeys.products(accountId, { model_id: searchModelId ?? "", limit: String(PRODUCTS_PAGE_SIZE), offset: "0" }),
+    queryFn: () => getProducts({ model_id: searchModelId ?? "", limit: String(PRODUCTS_PAGE_SIZE), offset: "0" }),
+    // Product inventory is edited in the admin panel. Revalidate whenever this
+    // listing is entered, while React Query keeps cached rows visible during
+    // the background request.
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+  const apiBrands = brandsQuery.data ?? [];
+  const apiCategories = categoriesQuery.data ?? [];
+  const productsLoading = firstPageQuery.isLoading;
+  const initialProductsError = firstPageQuery.error
+    ? "Products could not be loaded right now."
+    : "";
+  const firstPageProducts = useMemo(
+    () => (firstPageQuery.data ?? []).map(mapApiProduct),
+    [firstPageQuery.data],
+  );
   useEffect(() => {
-    void Promise.allSettled([getBrands(), getCategories()]).then(
-      ([brandResult, categoryResult]) => {
-        if (brandResult.status === "fulfilled") setApiBrands(brandResult.value);
-        if (categoryResult.status === "fulfilled") setApiCategories(categoryResult.value);
+    apiProductsRef.current = apiProducts;
+  }, [apiProducts]);
+  useEffect(() => {
+    apiProductsRef.current = [];
+    pendingProductsRef.current = [];
+    serverMayHaveMoreRef.current = false;
+    setApiProducts([]);
+    setHasMoreProducts(false);
+  }, [searchModelId]);
+  useEffect(() => {
+    if (!firstPageQuery.data) return;
+    const mapped = firstPageProducts;
+    // A new first page can reflect products added, removed, or reordered in
+    // the admin panel, so discard any previously paginated rows and let the
+    // scroll loader request fresh pages from the new offset.
+    apiProductsRef.current = mapped.slice(0, PRODUCTS_PAGE_SIZE);
+    setApiProducts(apiProductsRef.current);
+    pendingProductsRef.current = mapped.slice(PRODUCTS_PAGE_SIZE);
+    serverMayHaveMoreRef.current = firstPageQuery.data.length === PRODUCTS_PAGE_SIZE;
+    setHasMoreProducts(pendingProductsRef.current.length > 0 || serverMayHaveMoreRef.current);
+  }, [firstPageProducts, firstPageQuery.data]);
+  useEffect(() => {
+    const target = paginationSentinelRef.current;
+    if (!target || !hasMoreProducts || productsLoading || loadingMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setLoadingMore(true);
+        if (pendingProductsRef.current.length) {
+          const batch = pendingProductsRef.current.splice(0, PRODUCTS_PAGE_SIZE);
+          setApiProducts((current) => [...current, ...batch]);
+          setHasMoreProducts(pendingProductsRef.current.length > 0 || serverMayHaveMoreRef.current);
+          setLoadingMore(false);
+          return;
+        }
+        const currentProducts = apiProductsRef.current;
+        const pageQuery = { model_id: searchModelId ?? "", limit: String(PRODUCTS_PAGE_SIZE), offset: String(currentProducts.length) };
+        void queryClient.fetchQuery({
+          queryKey: apiQueryKeys.products(accountId, pageQuery),
+          queryFn: () => getProducts(pageQuery),
+          staleTime: 0,
+        })
+          .then((records) => {
+            const next = records.map(mapApiProduct);
+            const existingSlugs = new Set(currentProducts.map((item) => item.slug));
+            const uniqueNext = next.filter((item) => !existingSlugs.has(item.slug));
+            const batch = uniqueNext.slice(0, PRODUCTS_PAGE_SIZE);
+            pendingProductsRef.current = uniqueNext.slice(PRODUCTS_PAGE_SIZE);
+            serverMayHaveMoreRef.current = records.length === PRODUCTS_PAGE_SIZE && uniqueNext.length > 0;
+            setApiProducts((current) => {
+              const currentSlugs = new Set(current.map((item) => item.slug));
+              return [...current, ...batch.filter((item) => !currentSlugs.has(item.slug))];
+            });
+            setHasMoreProducts(pendingProductsRef.current.length > 0 || serverMayHaveMoreRef.current);
+          })
+          .catch(() => {
+            setPaginationError("More products could not be loaded right now.");
+            setHasMoreProducts(false);
+          })
+          .finally(() => setLoadingMore(false));
       },
+      { rootMargin: "700px 0px" },
     );
-  }, []);
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [accountId, apiProducts.length, hasMoreProducts, loadingMore, productsLoading, queryClient]);
   useEffect(() => {
-    setBrand(searchBrand ?? "All");
-    setCategory(searchCategory ?? "All");
-  }, [searchBrand, searchCategory]);
-  const selectedBrandId = apiBrands.find((item) => item.brand_name === brand)?.brand_id ?? "";
-  useEffect(() => {
-    setModel("All");
-    setModels([]);
-    if (!selectedBrandId) {
-      setModelsLoading(false);
-      return;
-    }
-    let active = true;
-    setModelsLoading(true);
-    void getModels(selectedBrandId)
-      .then((records) => {
-        if (active) setModels(records);
-      })
-      .catch(() => {
-        if (active) setModels([]);
-      })
-      .finally(() => {
-        if (active) setModelsLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [selectedBrandId]);
+    setSelectedBrands(searchBrand && searchBrand !== "All" ? [searchBrand] : []);
+    setSelectedCategories(searchCategory && searchCategory !== "All" ? [searchCategory] : []);
+    setSelectedModels(searchModelId ? [searchModelId] : []);
+  }, [searchBrand, searchCategory, searchModelId]);
+  const selectedBrandIds = apiBrands
+    .filter((item) => selectedBrands.includes(item.brand_name))
+    .map((item) => item.brand_id);
+  const modelsLoading = allModelsQuery.isLoading;
+  const models = useMemo(() => {
+    const uniqueModels = new Map<string, ModelRecord>();
+    (allModelsQuery.data ?? [])
+      .filter((record) => !selectedBrandIds.length || selectedBrandIds.includes(record.brand_id))
+      .forEach((record) => uniqueModels.set(record.model_id, record));
+    return [...uniqueModels.values()];
+  }, [allModelsQuery.data, selectedBrandIds.join(",")]);
+  const allProducts = apiProducts.length ? apiProducts : firstPageProducts;
+  const availableBrandNames = apiBrands.map((item) => item.brand_name);
+  const availableCategoryNames = apiCategories.map((item) => item.category_name);
+  const productsError = paginationError || initialProductsError;
   const products = useMemo(() => {
     const q = (search.q ?? "").toLowerCase();
-    const filtered = catalog.filter(
+    const filtered = allProducts.filter(
       (p) =>
-        (brand === "All" || p.brand.toLowerCase() === brand.toLowerCase()) &&
-        (category === "All" || p.category === category) &&
-        (model === "All" || p.name.toLowerCase().includes(model.toLowerCase())) &&
+        (!selectedBrands.length || selectedBrands.some((value) => p.brand.toLowerCase() === value.toLowerCase())) &&
+        (!selectedCategories.length || selectedCategories.includes(p.category)) &&
+        (!selectedModels.length || selectedModels.includes(p.modelId ?? "")) &&
         Number(p.price.replace(/\D/g, "")) >= priceMin &&
         Number(p.price.replace(/\D/g, "")) <= priceMax &&
         (!q || `${p.brand} ${p.name} ${p.category}`.toLowerCase().includes(q)) &&
-        (!topRated || p.rating >= 4.8),
+        (!topRated || !p.rating || p.rating >= 4.8),
     );
-    return [...filtered].sort((a, b) =>
-      sort === "Rating"
-        ? b.rating - a.rating
-        : sort === "Price: Low"
-          ? Number(a.price.replace(/\D/g, "")) - Number(b.price.replace(/\D/g, ""))
-          : 0,
-    );
-  }, [brand, category, model, priceMin, priceMax, search.q, sort, topRated]);
+    const priceValue = (price: string) => Number(price.replace(/\D/g, "")) || 0;
+    return [...filtered].sort((a, b) => {
+      if (sort === "Rating") return b.rating - a.rating;
+      if (sort === "Name: A to Z") return a.name.localeCompare(b.name);
+      if (sort === "Name: Z to A") return b.name.localeCompare(a.name);
+      if (sort === "Price: Low to High") return priceValue(a.price) - priceValue(b.price);
+      if (sort === "Price: High to Low") return priceValue(b.price) - priceValue(a.price);
+      return 0;
+    });
+  }, [allProducts, selectedBrands, selectedCategories, selectedModels, priceMin, priceMax, search.q, sort, topRated]);
   const formatPrice = (value: number) => `₹${new Intl.NumberFormat("en-IN").format(value)}`;
   const resetFilters = () => {
-    setBrand("All");
-    setCategory("All");
-    setModel("All");
+    setSelectedBrands([]);
+    setSelectedCategories([]);
+    setSelectedModels([]);
     setPriceMin(0);
     setPriceMax(999999);
+    setPaginationError("");
+    if (searchModelId) void navigate({ search: (previous) => ({ ...previous, model_id: undefined }) });
+  };
+  const toggleSelection = (values: string[], setValues: (next: string[]) => void, value: string) => {
+    setValues(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
   };
   return (
     <PageShell>
       <main className="mx-auto max-w-[1400px] px-4 py-7 md:px-8">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase text-primary">EMI Store</p>
             <h1 className="truncate font-display text-3xl md:text-4xl">
-              {brand === "All" ? "All Products" : brand}
+              {selectedBrands.length === 1 ? selectedBrands[0] : "All Products"}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">{products.length} products found</p>
           </div>
           <Button variant="outline" onClick={() => setDrawer(true)}>
             <SlidersHorizontal className="size-4" />
             Filters
           </Button>
         </div>
-        <div className="mt-6 flex flex-wrap gap-2">
-          <label className="flex items-center gap-2 rounded-full border border-border px-4 text-sm">
-            <span>Sort</span>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="h-10 bg-transparent outline-none"
-            >
-              <option>Featured</option>
-              <option>Rating</option>
-              <option>Price: Low</option>
-            </select>
-            <ChevronDown className="size-4" />
-          </label>
-          <Button
-            variant={topRated ? "default" : "outline"}
-            className="rounded-full"
-            onClick={() => setTopRated((v) => !v)}
-          >
-            <Star className="size-4" />
-            Top Rated
-          </Button>
-          {(brand !== "All" ||
-            category !== "All" ||
-            model !== "All" ||
-            priceMin > 0 ||
-            priceMax < 999999) && (
-            <Button variant="ghost" className="rounded-full" onClick={resetFilters}>
-              <X className="size-4" /> Clear filters
-            </Button>
-          )}
-        </div>
+       
         <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {products.map((product) => (
+          {productsLoading && Array.from({ length: 8 }, (_, index) => <div key={`product-skeleton-${index}`} className="aspect-[.78] animate-pulse rounded-card bg-muted" />)}
+          {!productsLoading && products.map((product) => (
             <ProductCard key={product.slug} product={product} />
           ))}
         </div>
-        {products.length === 0 && (
+        {!productsLoading && products.length === 0 && !hasMoreProducts && (
           <div className="py-24 text-center">
             <PackageEmpty />
-            <h2 className="mt-3 font-display text-2xl">No products match</h2>
+            <h2 className="mt-3 font-display text-2xl">{productsError || !allProducts.length ? "No data found" : "No products match"}</h2>
+            {productsError && <p className="mt-2 text-sm text-muted-foreground">{productsError}</p>}
             <Button
               className="mt-4"
               onClick={() => {
@@ -182,6 +245,15 @@ function ProductsPage() {
             >
               Clear filters
             </Button>
+          </div>
+        )}
+        {hasMoreProducts && (
+          <div ref={paginationSentinelRef} className="mt-6 min-h-8" aria-live="polite">
+            {(loadingMore || productsError) && (
+              <p className="py-3 text-center text-sm text-muted-foreground">
+                {loadingMore ? "Loading more products…" : productsError}
+              </p>
+            )}
           </div>
         )}
       </main>
@@ -233,7 +305,7 @@ function ProductsPage() {
                     </p>
                     {[
                       "All",
-                      ...(apiBrands.length ? apiBrands.map((item) => item.brand_name) : brands),
+                      ...availableBrandNames,
                     ].map((value) => (
                       <label
                         key={value}
@@ -241,21 +313,25 @@ function ProductsPage() {
                       >
                         <span className="flex items-center gap-3">
                           <input
-                            type="radio"
-                            name="brand"
-                            checked={brand === value}
+                            type="checkbox"
+                            checked={value === "All" ? selectedBrands.length === 0 : selectedBrands.includes(value)}
                             onChange={() => {
-                              setBrand(value);
-                              setModel("All");
+                              if (value === "All") {
+                                setSelectedBrands([]);
+                                setSelectedModels([]);
+                              } else {
+                                toggleSelection(selectedBrands, setSelectedBrands, value);
+                                setSelectedModels([]);
+                              }
                             }}
                             className="accent-[var(--primary)]"
                           />
                           {value}
                         </span>
                         <small className="text-muted-foreground">
-                          {value === "All"
-                            ? catalog.length
-                            : catalog.filter((p) => p.brand === value).length}
+              {value === "All"
+                            ? allProducts.length
+                            : allProducts.filter((p) => p.brand === value).length}
                         </small>
                       </label>
                     ))}
@@ -268,22 +344,26 @@ function ProductsPage() {
                     </p>
                     {[
                       "All",
-                      ...(apiCategories.length
-                        ? apiCategories.map((item) => item.category_name)
-                        : categories),
-                    ].map((value) => (
+                      ...availableCategoryNames,
+                      ].map((value) => (
                       <label
                         key={value}
-                        className="mr-2 inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-3 py-2 text-sm"
+                        className="flex cursor-pointer items-center justify-between border-b border-border py-3 text-sm"
                       >
-                        <input
-                          type="radio"
-                          name="category"
-                          checked={category === value}
-                          onChange={() => setCategory(value)}
-                          className="accent-[var(--primary)]"
-                        />
-                        {value}
+                        <span className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={value === "All" ? selectedCategories.length === 0 : selectedCategories.includes(value)}
+                            onChange={() => value === "All"
+                              ? setSelectedCategories([])
+                              : toggleSelection(selectedCategories, setSelectedCategories, value)}
+                            className="accent-[var(--primary)]"
+                          />
+                          {value}
+                        </span>
+                        <small className="text-muted-foreground">
+                          {value === "All" ? allProducts.length : allProducts.filter((p) => p.category === value).length}
+                        </small>
                       </label>
                     ))}
                   </>
@@ -293,11 +373,7 @@ function ProductsPage() {
                     <p className="mb-4 text-xs font-semibold uppercase text-muted-foreground">
                       Choose model
                     </p>
-                    {!selectedBrandId ? (
-                      <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
-                        Choose a brand first to load its models.
-                      </p>
-                    ) : modelsLoading ? (
+                    {modelsLoading ? (
                       <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
                         Loading models…
                       </p>
@@ -312,13 +388,9 @@ function ProductsPage() {
                           },
                           ...models,
                         ].map((item) => (
-                          <button
+                          <label
                             key={item.model_id}
-                            type="button"
-                            onClick={() =>
-                              setModel(item.model_id === "All" ? "All" : item.model_name)
-                            }
-                            className={`flex w-full items-center gap-3 border-b border-border px-2 py-3 text-left text-sm transition hover:bg-muted ${model === (item.model_id === "All" ? "All" : item.model_name) ? "text-primary" : ""}`}
+                            className="flex w-full cursor-pointer items-center gap-3 border-b border-border px-2 py-3 text-left text-sm transition hover:bg-muted"
                           >
                             {item.model_image_url ? (
                               <img
@@ -329,11 +401,19 @@ function ProductsPage() {
                             ) : (
                               <span className="size-10 rounded-md bg-muted" />
                             )}
+                            <input
+                              type="checkbox"
+                              checked={item.model_id === "All" ? selectedModels.length === 0 : selectedModels.includes(item.model_id)}
+                              onChange={() => item.model_id === "All"
+                                ? setSelectedModels([])
+                                : toggleSelection(selectedModels, setSelectedModels, item.model_id)}
+                              className="accent-[var(--primary)]"
+                            />
                             <span className="flex-1">{item.model_name}</span>
-                            {model === (item.model_id === "All" ? "All" : item.model_name) && (
-                              <Check className="size-4" />
-                            )}
-                          </button>
+                            <small className="text-muted-foreground">
+                              {item.model_id === "All" ? allProducts.length : allProducts.filter((p) => p.modelId === item.model_id).length}
+                            </small>
+                          </label>
                         ))}
                       </>
                     )}

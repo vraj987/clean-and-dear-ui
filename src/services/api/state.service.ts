@@ -1,7 +1,7 @@
-import { getApi } from "./client";
+import { postApi } from "./client";
 import { unwrapApiResult } from "./response";
 import type { StateRecord } from "./models";
 
 export async function getStates() {
-  return unwrapApiResult(await getApi<StateRecord[]>("states"));
+  return unwrapApiResult(await postApi<StateRecord[]>("states", {}));
 }

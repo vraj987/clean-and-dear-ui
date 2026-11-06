@@ -27,6 +27,7 @@ import {
   inspectionStatusOptions,
   physicalChecks,
   repairChecks,
+  type InspectionCustomer,
   type InspectionStatus,
 } from "@/lib/inspection";
 import { readAuthSession, type AuthSession } from "@/services/api/auth";
@@ -34,7 +35,7 @@ import { readAuthSession, type AuthSession } from "@/services/api/auth";
 export const Route = createFileRoute("/inspection/$customerId")({
   head: () => ({
     meta: [
-      { title: "Device Inspection — BytePe" },
+      { title: "Device Inspection — Kimaat Lock" },
       { name: "description", content: "Complete a customer device inspection." },
     ],
   }),
@@ -45,7 +46,7 @@ type Eligibility = "eligible" | "not-eligible" | null;
 
 function InspectionDetailPage() {
   const { customerId } = Route.useParams();
-  const customer = inspectionCustomers.find((item) => item.id === customerId);
+  const customer = getInspectionCustomer(customerId);
   const [session, setSession] = useState<AuthSession | null>(null);
   const [ready, setReady] = useState(false);
   const [verifiedDevice, setVerifiedDevice] = useState(false);
@@ -119,7 +120,7 @@ function InspectionDetailPage() {
     return (
       <PageShell>
         <main className="mx-auto max-w-3xl px-4 py-16 text-center">
-          <h1 className="font-display text-3xl">Customer visit not found</h1>
+          <h1 className="font-display text-3xl">No data found</h1>
           <Button asChild variant="outline" className="mt-6 rounded-full">
             <Link to="/inspection">Back to inspections</Link>
           </Button>
@@ -645,6 +646,10 @@ function InspectionDetailPage() {
       </main>
     </PageShell>
   );
+}
+
+function getInspectionCustomer(_customerId: string): InspectionCustomer | undefined {
+  return undefined;
 }
 
 function SearchableDropdown({
